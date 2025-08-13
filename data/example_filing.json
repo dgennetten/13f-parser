@@ -1,0 +1,49 @@
+{
+  "fund_name": "Situational Awareness LP",
+  "manager": "Leopold Aschenbrenner",
+  "filing_date": "2024-01-15",
+  "accession_number": "0001193125-24-000001",
+  "processed_at": "2024-01-15T14:30:00",
+  "total_value": 1234567890,
+  "filing_period": "2023-12-31",
+  "manager_info": {
+    "name": "Situational Awareness LP"
+  },
+  "holdings": [
+    {
+      "security_name": "APPLE INC",
+      "cusip": "037833100",
+      "shares": 1000000,
+      "value": 123456789,
+      "put_call": null
+    },
+    {
+      "security_name": "MICROSOFT CORP",
+      "cusip": "594918104",
+      "shares": 500000,
+      "value": 98765432,
+      "put_call": null
+    },
+    {
+      "security_name": "ALPHABET INC",
+      "cusip": "02079K305",
+      "shares": 750000,
+      "value": 87654321,
+      "put_call": null
+    },
+    {
+      "security_name": "AMAZON.COM INC",
+      "cusip": "023135106",
+      "shares": 600000,
+      "value": 65432109,
+      "put_call": null
+    },
+    {
+      "security_name": "TESLA INC",
+      "cusip": "88160R101",
+      "shares": 300000,
+      "value": 54321098,
+      "put_call": null
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+# 13F Parser Configuration
+
+# Target funds to monitor
+target_funds:
+  - name: "Situational Awareness LP"
+    manager: "Leopold Aschenbrenner"
+    cik: ""  # Will be auto-detected
+    aliases:
+      - "Situational Awareness"
+      - "Leopold Aschenbrenner"
+
+# SEC EDGAR settings
+sec_edgar:
+  base_url: "https://www.sec.gov/Archives/edgar/data"
+  user_agent: "13F-Parser/1.0 (your-email@example.com)"
+  rate_limit_delay: 0.1  # seconds between requests
+  
+# Filing types to monitor
+filing_types:
+  - "13F-HR"      # Initial holdings report
+  - "13F-HR/A"    # Amended holdings report
+
+# Data storage
+data:
+  output_dir: "data"
+  file_format: "json"
+  backup_enabled: true
+  max_backups: 10
+
+# Notification settings
+notifications:
+  email_enabled: false
+  email_recipients: []
+  github_issue_enabled: true
+  slack_webhook: ""
+
+# Parsing settings
+parsing:
+  min_position_value: 10000  # Minimum position value to track
+  include_zero_positions: false
+  track_position_changes: true
+  save_raw_xml: false
+
+# GitHub Actions settings
+github_actions:
+  schedule: "0 14 * * *"  # Daily at 2 PM UTC (9 AM EST)
+  workflow_name: "13F Parser Daily Run"
+  auto_commit: true
+  branch: "main"

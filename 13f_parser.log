@@ -1,0 +1,10 @@
+2025-08-13 17:01:12,957 - main - INFO - Configuration loaded from config/settings.yaml
+2025-08-13 17:01:12,963 - main - INFO - Configuration loaded from config/settings.yaml
+2025-08-13 17:01:12,965 - notification_manager - INFO - Testing notification channels
+2025-08-13 17:01:12,966 - notification_manager - WARNING - GitHub token or repository not configured, skipping issue creation
+2025-08-13 17:01:12,966 - notification_manager - INFO - Notification test completed
+2025-08-13 17:06:13,398 - main - INFO - Configuration loaded from config/settings.yaml
+2025-08-13 17:06:13,405 - main - INFO - Configuration loaded from config/settings.yaml
+2025-08-13 17:06:13,407 - notification_manager - INFO - Testing notification channels
+2025-08-13 17:06:13,407 - notification_manager - WARNING - GitHub token or repository not configured, skipping issue creation
+2025-08-13 17:06:13,407 - notification_manager - INFO - Notification test completed

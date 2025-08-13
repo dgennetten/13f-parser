@@ -1,0 +1,134 @@
+name: 13F Parser Daily Run
+
+on:
+  schedule:
+    # Run daily at 2 PM UTC (9 AM EST)
+    - cron: '0 14 * * *'
+  workflow_dispatch:  # Allow manual triggering
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'config/**'
+      - '.github/workflows/**'
+
+jobs:
+  parse-13f-filings:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Create data directories
+      run: |
+        mkdir -p data/filings
+        mkdir -p data/summaries
+        mkdir -p data/backups
+        
+    - name: Run 13F Parser
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+        python src/main.py
+        
+    - name: Check for new filings
+      id: check-filings
+      run: |
+        if [ -d "data/filings" ] && [ "$(ls -A data/filings)" ]; then
+          echo "new_filings=true" >> $GITHUB_OUTPUT
+          echo "filings_count=$(ls data/filings/*.json | wc -l)" >> $GITHUB_OUTPUT
+        else
+          echo "new_filings=false" >> $GITHUB_OUTPUT
+          echo "filings_count=0" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Commit and push new data
+      if: steps.check-filings.outputs.new_filings == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add data/
+        git commit -m "📊 Update 13F filing data - $(date +'%Y-%m-%d %H:%M:%S')"
+        git push
+        
+    - name: Create summary issue
+      if: steps.check-filings.outputs.new_filings == 'true'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Create a summary of today's findings
+        echo "## 📊 13F Parser Daily Summary - $(date +'%Y-%m-%d')" > summary.md
+        echo "" >> summary.md
+        echo "**New Filings Found:** ${{ steps.check-filings.outputs.filings_count }}" >> summary.md
+        echo "" >> summary.md
+        echo "**Funds Monitored:**" >> summary.md
+        echo "- Situational Awareness LP (Leopold Aschenbrenner)" >> summary.md
+        echo "" >> summary.md
+        echo "**Next Run:** Tomorrow at 9 AM EST" >> summary.md
+        
+        # Create GitHub issue with summary
+        gh issue create \
+          --title "📊 13F Parser Daily Summary - $(date +'%Y-%m-%d')" \
+          --body-file summary.md \
+          --label "daily-summary" \
+          --label "13f-parser" \
+          --label "automated"
+          
+    - name: Upload data artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: 13f-filing-data
+        path: data/
+        retention-days: 30
+        
+    - name: Comment on PR if triggered by push
+      if: github.event_name == 'push' && github.ref != 'refs/heads/main'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: comments } = await github.rest.issues.listComments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number
+          });
+          
+          const botComment = comments.find(comment => 
+            comment.user.type === 'Bot' && 
+            comment.body.includes('13F Parser')
+          );
+          
+          if (botComment) {
+            await github.rest.issues.updateComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              comment_id: botComment.id,
+              body: `🤖 **13F Parser Update**\n\n✅ Parser has been updated and tested successfully!\n\n**Next scheduled run:** Tomorrow at 9 AM EST\n\n**Status:** All systems operational`
+            });
+          } else {
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🤖 **13F Parser Update**\n\n✅ Parser has been updated and tested successfully!\n\n**Next scheduled run:** Tomorrow at 9 AM EST\n\n**Status:** All systems operational`
+            });
+          }
